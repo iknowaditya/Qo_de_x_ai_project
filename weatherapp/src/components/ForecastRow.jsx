@@ -3,7 +3,25 @@ import ForecastDay from "./ForecastDay";
 
 export default function ForecastRow() {
   const { forecast, forecastLoading } = useWeather();
-  if (forecastLoading || !forecast?.list) return null;
+
+  if (forecastLoading)
+    return <div className="text-center text-white">Loading forecast...</div>;
+
+  // Show placeholders if no forecast data
+  if (!forecast?.list)
+    return (
+      <div className="flex justify-between mt-6 px-2 overflow-x-auto">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="bg-white/20 rounded p-2 flex flex-col items-center w-16"
+          >
+            <div className="text-sm font-medium text-white">--</div>
+            <div className="text-lg font-bold text-white">--°</div>
+          </div>
+        ))}
+      </div>
+    );
 
   // Filter: one forecast per day (12:00)
   const daily = [];

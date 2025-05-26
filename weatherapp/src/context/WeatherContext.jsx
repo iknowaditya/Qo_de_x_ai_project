@@ -76,7 +76,16 @@ export function WeatherProvider({ children }) {
         : fetchWeather(city, undefined, undefined, units),
     enabled: !!locationLoaded,
     refetchInterval: 30000,
-    onError: (err) => setError(err.message),
+    onError: (err) => {
+      // Axios error: err.response?.status === 404 means city not found
+      if (err?.response?.status === 404) {
+        setError(
+          "City/place not found. Please check your spelling and try again."
+        );
+      } else {
+        setError("Weather API error: " + (err?.message || "Unknown error"));
+      }
+    },
   });
 
   // React Query: Forecast
@@ -93,7 +102,15 @@ export function WeatherProvider({ children }) {
         : fetchForecast(city, undefined, undefined, units),
     enabled: !!locationLoaded,
     refetchInterval: 30000,
-    onError: (err) => setError(err.message),
+    onError: (err) => {
+      if (err?.response?.status === 404) {
+        setError(
+          "City/place not found. Please check your spelling and try again."
+        );
+      } else {
+        setError("Forecast API error: " + (err?.message || "Unknown error"));
+      }
+    },
   });
 
   // Search handler
@@ -108,14 +125,6 @@ export function WeatherProvider({ children }) {
   // Units toggle
   const toggleUnits = () =>
     setUnits(units === "metric" ? "imperial" : "metric");
-
-  // Error handling
-  useEffect(() => {
-    if (weatherError) setError("Weather API error: " + weatherError.message);
-    else if (forecastError)
-      setError("Forecast API error: " + forecastError.message);
-    else setError("");
-  }, [weatherError, forecastError]);
 
   return (
     <WeatherContext.Provider
